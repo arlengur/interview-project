@@ -13,7 +13,7 @@ import zio.ZLayer
 import zio.interop.catz._
 import JsonCodecs._
 
-class Routes(userService: UserService[Task]) extends Http4sDsl[Task] {
+class Routes(userService: UserService[Task], docService: DocumentService[Task]) extends Http4sDsl[Task] {
 
   object LimitParam  extends OptionalQueryParamDecoderMatcher[Int]("limit")
   object OffsetParam extends OptionalQueryParamDecoderMatcher[Int]("offset")
@@ -33,11 +33,26 @@ class Routes(userService: UserService[Task]) extends Http4sDsl[Task] {
           case _          => NotFound(ErrorResponse("User not found"))
         }
 
+      case GET -> Root / "doc" / LongVar(id) =>
+        docService.get(id).flatMap {
+          case Some(doc) => Ok(doc)
+          case _          => NotFound(ErrorResponse("Doc not found"))
+        }
+
       case req @ POST -> Root / "user" =>
         for {
           user <- req.as[User]
           response <- userService.validate(user).flatMap {
             case Valid(user)  => userService.create(user).flatMap(id => Ok(UserCreatedMessage(id)))
+            case Invalid(err) => BadRequest(err)
+          }
+        } yield response
+
+      case req @ POST -> Root / "doc" =>
+        for {
+          doc <- req.as[Document]
+          response <- docService.validate(doc).flatMap {
+            case Valid(doc)  => docService.create(doc).flatMap(id => Ok(DocCreatedMessage(id)))
             case Invalid(err) => BadRequest(err)
           }
         } yield response

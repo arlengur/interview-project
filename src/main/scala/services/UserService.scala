@@ -9,16 +9,21 @@ import io.getquill.Query
 import io.getquill.Update
 import models._
 import zio._
-
 import DatabaseService.QuillH2Ctx
+import cats.Monad
+import zio.interop.catz._
 
-trait UserService[F[_]] {
+abstract class UserService[F[_]: Monad] {
   def get(id: Long): F[Option[User]]
   def create(user: User): F[Long]
   def update(id: Long, user: User): F[Unit]
   def delete(id: Long): F[Unit]
   def list(limit: Int, offset: Int): F[List[User]]
   def validate(user: User): F[Validated[ErrorResponse, User]]
+  def findUser(name: String): F[Option[User]] = for {
+    u <- list(10, 0)
+    fu = u.find(_.name == name)
+  } yield(fu)
 
 }
 

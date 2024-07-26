@@ -31,6 +31,7 @@ object Main extends ZIOAppDefault {
       HttpServer.layer,
       Routes.layer,
       UserService.layer,
+      DocumentService.layer,
       DatabaseService.layer,
       DBMigrationService.layer
       // ,ZLayer.Debug.tree // uncomment to see layers graph
