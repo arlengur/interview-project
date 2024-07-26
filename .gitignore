@@ -1,0 +1,15 @@
+*.iml
+.idea/
+.bloop/
+.bsp/
+.metals/
+.vscode
+target/
+project/target/
+project/project/
+null/
+/.jvmopts
+*.sc
+metals.sbt
+.DS_Store
+
